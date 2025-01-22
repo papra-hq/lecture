@@ -46,7 +46,6 @@
     "release": "bumpp --commit --tag --push"
   },
   "dependencies": {
-    "tesseract.js": "^6.0.0",
     "unpdf": "^0.12.1"
   },
   "devDependencies": {

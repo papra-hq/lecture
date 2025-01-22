@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
-import { createWorker } from 'tesseract.js';
+import { exec } from 'node:child_process';
+import { env } from 'node:process';
 import { defineTextExtractor } from '../extractors.models';
 
 export const imageExtractorDefinition = defineTextExtractor({
@@ -11,13 +12,23 @@ export const imageExtractorDefinition = defineTextExtractor({
     'image/gif',
   ],
   extract: async ({ arrayBuffer }) => {
-    const buffer = Buffer.from(arrayBuffer);
+    const binary = env.LECTURE_TESSERACT_BINARY ?? 'tesseract';
 
-    const worker = await createWorker();
+    const { stdout } = await new Promise<{ stdout: string }>((resolve, reject) => {
+      const child = exec(`${binary} stdin stdout`, (error, stdout) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve({ stdout });
+        }
+      });
 
-    const { data: { text } } = await worker.recognize(buffer);
-    await worker.terminate();
+      child.stdin.write(Buffer.from(arrayBuffer));
+      child.stdin.end();
+    });
 
-    return { content: text };
+    return {
+      content: stdout,
+    };
   },
 });

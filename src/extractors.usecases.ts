@@ -1,8 +1,8 @@
-import type { ExtractorConfig } from './types';
+import type { PartialExtractorConfig } from './types';
 import { parseConfig } from './config';
 import { getExtractor } from './extractors.registry';
 
-export async function extractText({ arrayBuffer, mimeType, config: rawConfig }: { arrayBuffer: ArrayBuffer; mimeType: string; config?: ExtractorConfig }): Promise<{
+export async function extractText({ arrayBuffer, mimeType, config: rawConfig }: { arrayBuffer: ArrayBuffer; mimeType: string; config?: PartialExtractorConfig }): Promise<{
   extractorName: string | undefined;
   textContent: string | undefined;
   error?: Error;
@@ -33,13 +33,13 @@ export async function extractText({ arrayBuffer, mimeType, config: rawConfig }: 
   }
 }
 
-export async function extractTextFromBlob({ blob }: { blob: Blob }) {
+export async function extractTextFromBlob({ blob, config }: { blob: Blob; config?: PartialExtractorConfig }) {
   const arrayBuffer = await blob.arrayBuffer();
   const mimeType = blob.type;
 
-  return extractText({ arrayBuffer, mimeType });
+  return extractText({ arrayBuffer, mimeType, config });
 }
 
-export async function extractTextFromFile({ file }: { file: File }) {
-  return extractTextFromBlob({ blob: file });
+export async function extractTextFromFile({ file, config }: { file: File; config?: PartialExtractorConfig }) {
+  return extractTextFromBlob({ blob: file, config });
 }

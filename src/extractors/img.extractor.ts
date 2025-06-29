@@ -10,10 +10,12 @@ export const imageExtractorDefinition = defineTextExtractor({
     'image/webp',
     'image/gif',
   ],
-  extract: async ({ arrayBuffer }) => {
+  extract: async ({ arrayBuffer, config }) => {
+    const { languages } = config.tesseract;
+
     const buffer = Buffer.from(arrayBuffer);
 
-    const worker = await createWorker();
+    const worker = await createWorker(languages);
 
     const { data: { text } } = await worker.recognize(buffer);
     await worker.terminate();

@@ -4,7 +4,7 @@ import { glob } from 'tinyglobby';
 import { describe, expect, test } from 'vitest';
 import { extractText, extractTextFromBlob, extractTextFromFile } from './extractors.usecases';
 
-const fixtures = await glob(['fixtures/*', '!fixtures/*.expected']);
+const fixturesDir = await glob(['fixtures/*'], { onlyDirectories: true });
 
 describe('extractors usecases', () => {
   describe('extractText', () => {
@@ -32,22 +32,31 @@ describe('extractors usecases', () => {
     });
 
     describe('text is extracted from fixtures files', async () => {
-      test('at least one fixture file is found', () => {
-        expect(fixtures.length).to.be.greaterThan(0);
+      test('at least one fixture file is present', () => {
+        expect(fixturesDir.length).to.be.greaterThan(0);
       });
 
-      for (const fixture of fixtures) {
-        test(`fixture ${fixture}`, async () => {
-          const arrayBuffer = (await fs.readFile(fixture)).buffer as ArrayBuffer;
-          const mimeType = mime.getType(fixture);
+      for (const fixture of fixturesDir) {
+        // use test.concurrent to run the tests in parallel -> need to use the provided expect
+        test.concurrent(`fixture ${fixture}`, async ({ expect }) => {
+          const fixtureFilesPaths = await glob([`${fixture}/*`]);
+          const inputFilePath = fixtureFilesPaths.find(name => name.match(/\/\d{3}\.input\.\w+$/));
+          const configFilePath = fixtureFilesPaths.find(name => name.match(/\/\d{3}\.config\.ts$/));
 
-          const { textContent, error, extractorName } = await extractText({ arrayBuffer, mimeType });
+          const config = configFilePath ? (await import(configFilePath)).config : undefined;
+
+          const arrayBuffer = (await fs.readFile(inputFilePath)).buffer as ArrayBuffer;
+          const mimeType = mime.getType(inputFilePath);
+
+          const { textContent, error, extractorName } = await extractText({ arrayBuffer, mimeType, config });
 
           expect(error).to.eql(undefined);
           expect(extractorName).to.not.eql(undefined);
 
-          const snapshotFilename = fixture.split('/').pop().replace(/\..*$/, '.expected');
-          await expect(textContent).toMatchFileSnapshot(`../fixtures/${snapshotFilename}`, 'Fixture does not match snapshot');
+          const fixtureNumber = fixture.split('/').filter(Boolean).pop().slice(0, 3);
+          const expectedFilePath = `../${fixture}/${fixtureNumber}.expected.txt`;
+
+          await expect(textContent).toMatchFileSnapshot(expectedFilePath, 'Fixture does not match snapshot');
         });
       }
     });

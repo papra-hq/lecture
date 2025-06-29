@@ -1,10 +1,13 @@
+import type { ExtractorConfig } from './types';
+import { parseConfig } from './config';
 import { getExtractor } from './extractors.registry';
 
-export async function extractText({ arrayBuffer, mimeType }: { arrayBuffer: ArrayBuffer; mimeType: string }): Promise<{
+export async function extractText({ arrayBuffer, mimeType, config: rawConfig }: { arrayBuffer: ArrayBuffer; mimeType: string; config?: ExtractorConfig }): Promise<{
   extractorName: string | undefined;
   textContent: string | undefined;
   error?: Error;
 }> {
+  const { config } = parseConfig({ rawConfig });
   const { extractor } = getExtractor({ mimeType });
 
   if (!extractor) {
@@ -15,7 +18,7 @@ export async function extractText({ arrayBuffer, mimeType }: { arrayBuffer: Arra
   }
 
   try {
-    const { content } = await extractor.extract({ arrayBuffer });
+    const { content } = await extractor.extract({ arrayBuffer, config });
 
     return {
       extractorName: extractor.name,

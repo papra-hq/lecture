@@ -1,3 +1,5 @@
+export { ocrLanguages } from './config';
+
 export {
   extractText,
   extractTextFromBlob,

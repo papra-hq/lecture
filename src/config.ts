@@ -1,20 +1,20 @@
 import type { ExtractorConfig, PartialExtractorConfig } from './types';
 import { languages as tesseractLanguages } from 'tesseract.js';
 
-const languages = Object.values(tesseractLanguages);
+export const ocrLanguages = Object.values(tesseractLanguages);
 
 export function parseConfig({ rawConfig = {} }: { rawConfig?: PartialExtractorConfig } = {}): { config: ExtractorConfig } {
-  const ocrLanguages = rawConfig.tesseract?.languages ?? [];
-  const invalidLanguages = ocrLanguages.filter(language => !languages.includes(language));
+  const languages = rawConfig.tesseract?.languages ?? [];
+  const invalidLanguages = languages.filter(language => !ocrLanguages.includes(language));
 
   if (invalidLanguages.length > 0) {
-    throw new Error(`Invalid languages for tesseract: ${invalidLanguages.join(', ')}. Valid languages are: ${languages.join(', ')}`);
+    throw new Error(`Invalid languages for tesseract: ${invalidLanguages.join(', ')}. Valid languages are: ${ocrLanguages.join(', ')}`);
   }
 
   return {
     config: {
       tesseract: {
-        languages: ocrLanguages.length > 0 ? ocrLanguages : ['eng'],
+        languages: languages.length > 0 ? languages : ['eng'],
       },
     },
   };

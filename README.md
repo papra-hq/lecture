@@ -1,8 +1,9 @@
 > [!IMPORTANT]
-> The source code of this library has been moved to the [Papra](https://github.com/papra-hq/papra) monorepo repository.
+> The source code of this library has been moved to the [Papra](https://github.com/papra-hq/papra/tree/main/packages/lecture) monorepo repository, under the `packages/lecture` package path.
+> 
 > This repository is now archived.
 
-# @papra/lecture
+# @papra/lecture - Archived, see the [Papra](https://github.com/papra-hq/papra/tree/main/packages/lecture) monorepo
 
 `@papra/lecture` is a robust and lightweight library for extracting text content from various file formats. Whether you're processing Document for indexing or for LLM readability, this library simplifies the task of reading text content programmatically.
 
